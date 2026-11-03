@@ -1,4 +1,4 @@
-<p align="center"><img src="icon_1024.png" width="160" alt="NotchPeek icon"></p>
+<p align="center"><img src="demo.gif" width="720" alt="The cursor moves up into the notch and all windows spread out into Mission Control"></p>
 
 <h1 align="center">NotchPeek</h1>
 
