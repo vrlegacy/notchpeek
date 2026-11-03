@@ -69,6 +69,9 @@ rm -f "$DIST/$APP_NAME-$VERSION.dmg"
 hdiutil create -volname "$APP_NAME" -srcfolder "$STAGE" -ov -format UDZO "$DIST/$APP_NAME-$VERSION.dmg" >/dev/null
 if [ -n "$IDENTITY" ]; then codesign --force --sign "$IDENTITY" "$DIST/$APP_NAME-$VERSION.dmg"; fi
 
+echo "==> Cleaning up build copies (so only one NotchPeek shows in Spotlight/Launchpad)"
+rm -rf "$BUILD"
+
 echo "==> Starting $APP_NAME"
 open "$DEST/$APP_NAME.app"
 

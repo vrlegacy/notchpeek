@@ -12,15 +12,23 @@ NotchPeek is a tiny menu bar app for macOS. Push your cursor up into the camera 
 
 1. Download **NotchPeek-1.0.dmg** from [Releases](https://github.com/vrlegacy/notchpeek/releases).
 2. Open it and drag **NotchPeek** into **Applications**.
-3. Open NotchPeek. The first time, macOS may warn about an unidentified developer: right-click the app, choose **Open**, then **Open** again.
+3. Open NotchPeek from Applications.
+
+The first time, macOS may block it because it's from an unidentified developer:
+
+- **macOS 15 Sequoia or later:** click **Done**, then go to **System Settings → Privacy & Security**, scroll down and click **Open Anyway** next to NotchPeek.
+- **macOS 14 or earlier:** right-click the app, choose **Open**, then **Open** again.
+
+You only need to do this once.
 
 ## Use
 
-Look for the NotchPeek icon in the menu bar. From there you can:
+NotchPeek has no Dock icon or window. After you open it, look for its icon in the menu bar near the clock. From there you can:
 
 - turn it **on or off**
 - choose a **Trigger Delay** (Instant, Short, Medium, Long) so it doesn't fire by accident
 - turn **Launch at Login** on or off
+- **Hide Menu Bar Icon**: NotchPeek keeps working in the background. To bring the icon back, open NotchPeek again from Applications or Spotlight.
 - **Quit**
 
 ## Requirements
@@ -37,7 +45,11 @@ cd notchpeek
 bash build.command
 ```
 
-This builds `NotchPeek.app`, installs it in Applications, starts it, and makes `dist/NotchPeek-1.0.dmg`.
+This builds `NotchPeek.app`, installs it in `/Applications` (or `~/Applications` if that isn't writable), starts it, and makes `dist/NotchPeek-1.0.dmg`. It takes about a minute and ends with **Done!**
+
+## Uninstall
+
+Click the NotchPeek icon in the menu bar (if it's hidden, open NotchPeek from Applications to show it), choose **Quit NotchPeek**, then move **NotchPeek** from Applications to the Trash.
 
 ## License
 

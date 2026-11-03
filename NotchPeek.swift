@@ -15,6 +15,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         get { defaults.object(forKey: "enabled") as? Bool ?? true }
         set { defaults.set(newValue, forKey: "enabled") }
     }
+    private var showIcon: Bool {
+        get { defaults.object(forKey: "showIcon") as? Bool ?? true }
+        set { defaults.set(newValue, forKey: "showIcon") }
+    }
     private var dwell: Double {
         get { defaults.object(forKey: "dwell") as? Double ?? 0.15 }
         set { defaults.set(newValue, forKey: "dwell") }
@@ -32,6 +36,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             image?.isTemplate = true
             button.image = image
         }
+        statusItem.isVisible = showIcon
         rebuildMenu()
 
         timer = Timer(timeInterval: 0.03, repeats: true) { [weak self] _ in self?.tick() }
@@ -43,6 +48,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             defaults.set(true, forKey: "didSetupLogin")
             rebuildMenu()
         }
+    }
+
+    // Opening NotchPeek again (from Applications, Spotlight or Launchpad) brings the icon back.
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !showIcon {
+            showIcon = true
+            statusItem.isVisible = true
+        }
+        statusItem.button?.performClick(nil)
+        return false
     }
 
     // MARK: Notch detection
@@ -115,6 +130,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             menu.addItem(login)
         }
 
+        let hide = NSMenuItem(title: "Hide Menu Bar Icon", action: #selector(hideIcon), keyEquivalent: "")
+        hide.target = self
+        menu.addItem(hide)
+
         menu.addItem(.separator())
         let about = NSMenuItem(title: "About NotchPeek", action: #selector(showAbout), keyEquivalent: "")
         about.target = self
@@ -151,6 +170,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 alert.runModal()
             }
             rebuildMenu()
+        }
+    }
+
+    @objc private func hideIcon() {
+        NSApp.activate(ignoringOtherApps: true)
+        let alert = NSAlert()
+        alert.messageText = "Hide the menu bar icon?"
+        alert.informativeText = "NotchPeek keeps working in the background. To show the icon again, open NotchPeek from Applications or Spotlight."
+        alert.addButton(withTitle: "Hide Icon")
+        alert.addButton(withTitle: "Cancel")
+        if alert.runModal() == .alertFirstButtonReturn {
+            showIcon = false
+            statusItem.isVisible = false
         }
     }
 
