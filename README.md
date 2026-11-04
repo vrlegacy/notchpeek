@@ -4,6 +4,8 @@
 
 <p align="center">Touch the notch with your cursor to open Mission Control.</p>
 
+<p align="center"><a href="https://vrlegacy.github.io/notchpeek/">Website</a> &nbsp;&nbsp; <a href="https://github.com/vrlegacy/notchpeek/releases/latest">Download</a></p>
+
 ---
 
 NotchPeek is a tiny menu bar app for macOS. Push your cursor up into the camera notch at the top of your MacBook screen and Mission Control opens. On screens without a notch, a strip at the top center works the same way.
@@ -54,3 +56,13 @@ Click the NotchPeek icon in the menu bar (if it's hidden, open NotchPeek from Ap
 ## License
 
 MIT © 2026 Vishwas
+
+## Website
+
+The marketing site lives in [`website/`](website/) (React + Vite) and deploys to GitHub Pages automatically on every push to `main`. To work on it locally:
+
+```bash
+cd website
+npm install
+npm run dev
+```
