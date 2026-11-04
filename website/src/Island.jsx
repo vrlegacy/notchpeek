@@ -1,22 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
-import { DMG, ICON } from './links.js'
+import { ICON } from './links.js'
+import { SECTIONS } from './Intro.jsx'
+import './Island.css'
 
-const SECTIONS = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'how', label: 'How it works' },
-  { id: 'features', label: 'Features' },
-  { id: 'install', label: 'Install' },
-]
-
+// The Dynamic Island works like the notch: rest the pointer on it (or tap it)
+// and every section spreads out as its own window.
 export default function Island() {
-  const [open, setOpen] = useState(false)
-  const [current, setCurrent] = useState(SECTIONS[0])
-  const navRef = useRef(null)
-  const hoverCapable = useRef(false)
-
-  useEffect(() => {
-    hoverCapable.current = window.matchMedia('(hover: hover)').matches
-  }, [])
+  const [current, setCurrent] = useState(0)
+  const dwell = useRef(null)
+  const armed = useRef(true)
 
   // Track which section is in the middle of the screen
   useEffect(() => {
@@ -24,8 +16,8 @@ export default function Island() {
       (entries) => {
         entries.forEach((e) => {
           if (e.isIntersecting) {
-            const s = SECTIONS.find((x) => x.id === e.target.id)
-            if (s) setCurrent(s)
+            const i = SECTIONS.findIndex((x) => x.id === e.target.id)
+            if (i >= 0) setCurrent(i)
           }
         })
       },
@@ -38,70 +30,37 @@ export default function Island() {
     return () => io.disconnect()
   }, [])
 
-  // Close on Escape, outside tap, or scroll (touch)
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e) => e.key === 'Escape' && setOpen(false)
-    const onDown = (e) => navRef.current && !navRef.current.contains(e.target) && setOpen(false)
-    const onScroll = () => !hoverCapable.current && setOpen(false)
-    window.addEventListener('keydown', onKey)
-    window.addEventListener('pointerdown', onDown)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => {
-      window.removeEventListener('keydown', onKey)
-      window.removeEventListener('pointerdown', onDown)
-      window.removeEventListener('scroll', onScroll)
-    }
-  }, [open])
+  useEffect(() => () => clearTimeout(dwell.current), [])
+
+  const open = (viaKeyboard = false) => {
+    armed.current = false
+    window.dispatchEvent(new CustomEvent('notchpeek:mission', { detail: { from: current, viaKeyboard } }))
+  }
 
   return (
     <header className="island-wrap">
-      <nav
-        ref={navRef}
-        className={`island${open ? ' is-open' : ''}`}
-        aria-label="Main"
-        onMouseEnter={() => hoverCapable.current && setOpen(true)}
-        onMouseLeave={() => hoverCapable.current && setOpen(false)}
+      <button
+        type="button"
+        className="island"
+        aria-label={`Show all sections. You're on ${SECTIONS[current].label}.`}
+        onPointerEnter={(e) => {
+          if (e.pointerType !== 'mouse' || !armed.current) return
+          clearTimeout(dwell.current)
+          dwell.current = setTimeout(() => open(false), 150)
+        }}
+        onPointerLeave={(e) => {
+          if (e.pointerType !== 'mouse') return
+          clearTimeout(dwell.current)
+          armed.current = true
+        }}
+        onClick={(e) => open(e.detail === 0)}
       >
-        <button
-          type="button"
-          className="island-compact"
-          aria-expanded={open}
-          aria-controls="island-menu"
-          onClick={() => setOpen((v) => !v)}
-          inert={open}
-        >
-          <img src={ICON} alt="" width="22" height="22" />
-          <span className="island-label" key={current.id}>
-            {current.label}
-          </span>
-          <span className="island-live" aria-hidden="true" />
-          <span className="visually-hidden">Open navigation</span>
-        </button>
-
-        <div id="island-menu" className="island-full" inert={!open}>
-          <a className="island-brand" href="#overview" onClick={() => setOpen(false)}>
-            <img src={ICON} alt="" width="24" height="24" />
-            NotchPeek
-          </a>
-          <ul>
-            {SECTIONS.map((s) => (
-              <li key={s.id}>
-                <a
-                  href={`#${s.id}`}
-                  aria-current={current.id === s.id ? 'true' : undefined}
-                  onClick={() => setOpen(false)}
-                >
-                  {s.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-          <a className="island-cta" href={DMG}>
-            Download
-          </a>
-        </div>
-      </nav>
+        <img src={ICON} alt="" width="22" height="22" />
+        <span className="island-label" key={current}>
+          {SECTIONS[current].label}
+        </span>
+        <span className="island-live" aria-hidden="true" />
+      </button>
     </header>
   )
 }

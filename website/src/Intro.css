@@ -1,0 +1,456 @@
+/* ---------- Mission Control overlay: first-visit intro + island ---------- */
+/* home:   the real page shows, the intro cursor heads for the island
+   lift:   the window for the section you're on covers the page
+   grid:   it shrinks into Mission Control next to the other sections
+   target/press: (intro only) the cursor picks Overview
+   zoom:   the chosen window grows to full screen
+   done:   the overlay fades and you're in that section */
+html[data-intro] body {
+  overflow: hidden;
+}
+html[data-intro='touch'] .island {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 0 36px 10px rgba(150, 196, 255, 0.55),
+    0 0 120px 30px rgba(150, 196, 255, 0.25);
+}
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  transition: opacity 0.35s;
+}
+.intro.stage-done {
+  opacity: 0;
+  pointer-events: none;
+}
+.intro-desk {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.intro-bg,
+.intro-dim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.intro-bg {
+  background: linear-gradient(180deg, var(--violet-top), var(--violet-bottom));
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.stage-lift .intro-bg,
+.stage-grid .intro-bg,
+.stage-target .intro-bg,
+.stage-press .intro-bg,
+.stage-zoom .intro-bg {
+  opacity: 1;
+}
+.intro-dim {
+  background: rgba(8, 6, 30, 0);
+  transition: background-color 0.5s;
+}
+.stage-grid .intro-dim,
+.stage-target .intro-dim,
+.stage-press .intro-dim {
+  background: rgba(8, 6, 30, 0.45);
+}
+
+/* windows */
+.iw {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  width: 36%;
+  height: 32%;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 24px 60px rgba(12, 6, 50, 0.45), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  container-type: inline-size;
+  opacity: 0;
+  scale: 0.9;
+  transition: left 0.7s var(--ease-spring), top 0.7s var(--ease-spring), width 0.7s var(--ease-spring),
+    height 0.7s var(--ease-spring), border-radius 0.7s var(--ease-spring), opacity 0.4s,
+    scale 0.6s var(--ease-spring), box-shadow 0.3s;
+}
+.iw-overview {
+  background: #000;
+}
+.iw-features,
+.iw-install {
+  background: var(--mist);
+}
+.iw-0 {
+  left: 12%;
+  top: 15%;
+}
+.iw-1 {
+  left: 52%;
+  top: 15%;
+}
+.iw-2 {
+  left: 12%;
+  top: 57%;
+}
+.iw-3 {
+  left: 52%;
+  top: 57%;
+}
+.stage-grid .iw,
+.stage-target .iw,
+.stage-press .iw {
+  opacity: 1;
+  scale: 1;
+}
+.stage-grid .iw:not(.is-from) {
+  transition-delay: 0.12s;
+}
+
+/* the section you were on starts full screen, then shrinks into the grid */
+.iw.is-from {
+  z-index: 5;
+}
+.stage-home .is-from,
+.stage-notch .is-from,
+.stage-lift .is-from {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  box-shadow: none;
+  scale: 1;
+}
+.stage-lift .is-from {
+  opacity: 1;
+  transition: opacity 0.15s;
+}
+
+/* the chosen window grows back to full screen */
+.stage-zoom .is-target,
+.stage-done .is-target {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  box-shadow: none;
+  opacity: 1;
+  scale: 1;
+  z-index: 6;
+}
+.stage-zoom .iw:not(.is-target),
+.stage-done .iw:not(.is-target) {
+  opacity: 0;
+  scale: 0.95;
+}
+
+/* window chrome hides while a window fills the screen */
+.iw-bar,
+.pv {
+  transition: opacity 0.3s;
+}
+.stage-home .is-from :is(.iw-bar, .pv),
+.stage-notch .is-from :is(.iw-bar, .pv),
+.stage-lift .is-from :is(.iw-bar, .pv),
+.stage-done .is-target :is(.iw-bar, .pv) {
+  opacity: 0;
+}
+.stage-grid .is-from :is(.iw-bar, .pv) {
+  transition: opacity 0.3s 0.25s;
+}
+.stage-zoom .is-target :is(.iw-bar, .pv) {
+  opacity: 0;
+  transition: opacity 0.3s 0.3s;
+}
+
+@media (hover: none) {
+  .hint-esc {
+    display: none;
+  }
+}
+
+/* when you pick a window yourself, it grows as a clean fill of that section's color */
+.mode-user.stage-zoom .is-target :is(.iw-bar, .pv) {
+  transition: opacity 0.15s;
+}
+
+/* picking a window */
+.stage-target .is-target,
+.stage-press .is-target,
+.mode-user.stage-grid .iw:hover,
+.mode-user.stage-grid .iw:focus-visible {
+  box-shadow: 0 0 0 4px #9cc4ff, 0 24px 60px rgba(12, 6, 50, 0.45);
+  outline: none;
+}
+.mode-user.stage-grid .iw {
+  cursor: pointer;
+}
+.stage-press .is-target {
+  scale: 0.985;
+}
+
+.iw-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 12px;
+  border-radius: 14px 14px 0 0;
+  background: var(--title-bar);
+}
+.iw-bar i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ff5f57;
+}
+.iw-bar i:nth-child(2) {
+  background: #febc2e;
+}
+.iw-bar i:nth-child(3) {
+  background: #28c840;
+}
+.iw-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 12px);
+  text-align: center;
+  font-size: 15px;
+  font-weight: 500;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.stage-grid .iw-label,
+.stage-target .iw-label,
+.stage-press .iw-label {
+  opacity: 1;
+  transition-delay: 0.4s;
+}
+
+/* intro cursor */
+.intro-cursor {
+  position: absolute;
+  z-index: 10;
+  width: 26px;
+  left: 78%;
+  top: 82%;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.45));
+  transition: left 1.1s var(--ease-move), top 1.1s var(--ease-move), scale 0.12s, opacity 0.3s;
+  pointer-events: none;
+}
+.stage-notch .intro-cursor,
+.stage-lift .intro-cursor,
+.stage-grid .intro-cursor {
+  left: 50%;
+  top: 30px;
+}
+.stage-target .intro-cursor,
+.stage-press .intro-cursor,
+.stage-zoom .intro-cursor,
+.stage-done .intro-cursor {
+  left: 30%;
+  top: 31%;
+}
+.stage-press .intro-cursor {
+  scale: 0.85;
+}
+.stage-zoom .intro-cursor,
+.stage-done .intro-cursor {
+  opacity: 0;
+}
+
+.intro-skip {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  z-index: 11;
+  min-height: 40px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 980px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.intro-skip:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+.intro-hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 24px;
+  z-index: 11;
+  text-align: center;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.72);
+  opacity: 0;
+  transition: opacity 0.3s 0.4s;
+  pointer-events: none;
+}
+.stage-grid .intro-hint {
+  opacity: 1;
+}
+
+/* section previews inside the windows */
+.pv {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 0 0 14px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.2cqw;
+  padding: 5cqw 6cqw;
+}
+.pv span,
+.pv i,
+.pv b {
+  display: block;
+  border-radius: 1cqw;
+}
+.pv-overview {
+  background: #000;
+}
+.pv-icon {
+  width: 7cqw;
+  aspect-ratio: 1;
+  background: linear-gradient(180deg, var(--violet-top), var(--violet-bottom));
+  border-radius: 1.8cqw !important;
+}
+.pv-h1 {
+  width: 62%;
+  height: 4.4cqw;
+  background: #f5f5f7;
+}
+.pv-h1.short {
+  width: 50%;
+}
+.pv-p {
+  width: 44%;
+  height: 1.6cqw;
+  background: #6e6e73;
+}
+.pv-btn {
+  width: 16%;
+  height: 3.6cqw;
+  border-radius: 4cqw !important;
+  background: var(--blue);
+}
+.pv-mac {
+  width: 64%;
+  flex: 1;
+  margin-top: 1cqw;
+  border: 1cqw solid #1b1b1f;
+  border-bottom: 0;
+  border-radius: 2cqw 2cqw 0 0 !important;
+  background: linear-gradient(180deg, var(--violet-top), var(--violet-bottom));
+}
+.pv-how {
+  background: #fff;
+}
+.pv-features,
+.pv-install {
+  background: var(--mist);
+}
+.pv-h2 {
+  width: 58%;
+  height: 3.8cqw;
+  background: var(--ink);
+  margin-bottom: 2cqw;
+}
+.pv-row {
+  display: flex !important;
+  gap: 4cqw;
+  width: 100%;
+}
+.pv-row i {
+  flex: 1;
+  aspect-ratio: 16 / 10;
+  border-radius: 2cqw !important;
+  background: linear-gradient(180deg, var(--violet-top), var(--violet-bottom));
+}
+.pv-bento {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2cqw;
+  width: 100%;
+  flex: 1;
+}
+.pv-bento i {
+  background: #fff;
+  border-radius: 2cqw !important;
+}
+.pv-bento .wide {
+  grid-column: span 2;
+}
+.pv-bento .dark {
+  background: #000;
+}
+.pv-install {
+  align-items: stretch;
+}
+.pv-install .pv-h2 {
+  align-self: center;
+}
+.pv-step {
+  display: flex !important;
+  align-items: center;
+  gap: 3cqw;
+  padding-top: 2cqw;
+  border-top: 1px solid #d2d2d7;
+}
+.pv-step b {
+  width: 4cqw;
+  aspect-ratio: 1;
+  border-radius: 50% !important;
+  background: var(--ink);
+}
+.pv-step i {
+  flex: 1;
+  height: 2cqw;
+  background: #c7c7cc;
+}
+
+@media (max-width: 720px) {
+  .iw {
+    width: 42%;
+    height: 26%;
+  }
+  .iw-0 {
+    left: 5%;
+    top: 18%;
+  }
+  .iw-1 {
+    left: 53%;
+    top: 18%;
+  }
+  .iw-2 {
+    left: 5%;
+    top: 54%;
+  }
+  .iw-3 {
+    left: 53%;
+    top: 54%;
+  }
+  .iw-label {
+    font-size: 13px;
+  }
+  .stage-target .intro-cursor,
+  .stage-press .intro-cursor,
+  .stage-zoom .intro-cursor,
+  .stage-done .intro-cursor {
+    left: 26%;
+    top: 30%;
+  }
+}

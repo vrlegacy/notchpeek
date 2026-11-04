@@ -1,0 +1,19 @@
+/* The island is now a single button: rest on it or tap it to see every section */
+.island {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px 0 10px;
+  border: 0;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+.island:hover {
+  --w: 212px;
+}
+.island img {
+  border-radius: 6px;
+}
